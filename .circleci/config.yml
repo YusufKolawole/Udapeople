@@ -1,44 +1,79 @@
 version: 2.1
 
 commands:
-  # destroy-environment:
-  #   description: Destroy back-end and front-end cloudformation stacks given a workflow ID.
-  #   parameters:
-  #     # Add parameter here
-  #     workflow_id:
-  #       default: "${CIRCLE_WORKFLOW_ID:0:7}"
-  #       type: string
-  #   steps:
-  #     - run:
-  #         name: Destroy environments
-  #         when: on_fail
-  #         command: |
-  #           # Your code here
-  #           aws s3 rm s3://udapeople-<<parameters.workflow_id>> --recursive
-  #           aws cloudformation delete-stack --stack-name "udapeople-backend-<<parameters.workflow_id>>"
-  #           aws cloudformation delete-stack --stack-name "udapeople-frontend-<<parameters.workflow_id>>"            
 
-  # revert-migrations:
-  #   description: Revert the last migration if successfully run in the current workflow.
-  #   parameters:
-  #     # Add parameter here
-  #     workflow_id:
-  #       default: "${CIRCLE_WORKFLOW_ID:0:7}"
-  #       type: string
+  # install_awscli:
+  #   description: Install AWS cli
   #   steps:
   #     - run:
-  #         name: Revert migrations
-  #         when: on_fail
+  #         name: Install AWS cli
   #         command: |
-  #           # Curl command here to see if there was a successful migration associated with the workflow id, store result in SUCCESS variable
-  #          SUCCESS=$(curl --insecure "https://kvdb.io/GihzLn9tKaS8UmwtTTnRhb/migration_<<parameters.workflow_id>>")
-  #           if(( $SUCCESS==1 ));
-  #           then
-  #             cd ~/project/backend
-  #             npm install
-  #           #  Add revert code here. You can find this in the Getting Started section.
-  #             npm run migrations:revert
-  #           fi
+  #           curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
+  #           unzip awscliv2.zip
+  #           sudo ./aws/install
+
+  # install_nodejs:
+  #    description: Install Node.js 13
+  #    steps:
+  #     - run:
+  #         name: Install Node.js 13
+  #         command: |
+  #           curl -fsSL https://deb.nodesource.com/setup_13.x | sudo -E bash -
+  #           sudo apt install -y nodejs
+
+
+  install_ansible:
+    description: Install Ansible
+    steps:
+      - run:
+          name: Install Ansible
+          command: |
+            sudo apt update
+            sudo apt install software-properties-common -y
+            sudo add-apt-repository --yes --update ppa:ansible/ansible
+            sudo apt install ansible -y
+
+  destroy-environment:
+    description: Destroy back-end and front-end cloudformation stacks given a workflow ID.
+    parameters:
+      # Add parameter here   
+      workflow_id:
+        default: "${CIRCLE_WORKFLOW_ID:0:7}"
+        type: string
+
+    steps:
+      - run:
+          name: Destroy environments
+          when: on_fail
+          command: |
+            # Your code here
+            aws s3 rm s3://udapeople-<<parameters.workflow_id>> --recursive
+            aws cloudformation delete-stack --stack-name "udapeople-backend-<<parameters.workflow_id>>"
+            aws cloudformation delete-stack --stack-name "udapeople-frontend-<<parameters.workflow_id>>"
+            
+            
+
+  revert-migrations:
+    description: Revert the last migration if successfully run in the current workflow.
+    parameters:
+      # Add parameter here 
+      workflow_id:
+        default: "${CIRCLE_WORKFLOW_ID:0:7}"
+        type: string
+    
+    steps:
+      - run:
+          name: Revert migrations
+          when: on_fail
+          command: |
+            # Curl command here to see if there was a successful migration associated with the workflow id, store result in SUCCESS variable
+            SUCCESS=$(curl --insecure "https://kvdb.io/GihzLn9tKaS8UmwtTTnRhb/migration_<<parameters.workflow_id>>")
+            if(( $SUCCESS==1 )); 
+            then
+              cd ~/project/backend
+              npm install
+              npm run migrations:revert
+            fi
 
 jobs:
   build-frontend:
@@ -134,8 +169,6 @@ jobs:
       - save_cache:
           paths: [frontend/node_modules]
           key: frontend-scan
-      # Restore from cache
-      # Your job code here
 
   scan-backend:
     docker:
@@ -206,35 +239,55 @@ jobs:
             - project/.circleci/ansible/inventory.txt
       # Here's where you will add some code to rollback on failure
 
-  # configure-infrastructure:
-  #   docker:
-  #     # Docker image here that supports Ansible
-  #     - image: cimg/base:stable
-  #   steps:
-  #     # Checkout code from git
-  #     - checkout
-  #     # Add ssh keys with fingerprint
-  #     - add_ssh_keys:
-  #         fingerprints:
-  #           - ""
-  #     # attach workspace
-  #     - attach_workspace:
-  #         at: ~/
+  configure-infrastructure:
+    docker:
+      # Docker image here that supports Ansible
+      - image: cimg/base:stable
+    steps:
+      # Checkout code from git
+      - checkout
+      # Add ssh keys with fingerprint
+      - add_ssh_keys:
+          fingerprints:
+            - "7c:94:37:dc:a6:23:58:07:35:9d:7e:c9:84:25:81:cc"
+      - attach_workspace:
+          at: ~/
 
-  #     - install_ansible
-  #     - install_awscli
-  #     - run:
-  #         name: Configure server
-  #         command: |
-  #           # Your code here
-  #           cd .circleci/ansible
-  #           cat inventory.txt
+      - install_ansible
+      # - install_awscli
+      - run:
+          name: Configure server
+          command: |
+            cd .circleci/ansible
+            cat inventory.txt
 
-  #           ansible-playbook -i inventory.txt configure-server.yml
-  #     - destroy-environment
+            ansible-playbook -i inventory.txt configure-server.yml
+      - destroy-environment
        # Here's where you will add some code to rollback on failure
 
-#      # Here's where you will add some code to rollback on failure
+  run-migrations:
+    docker:
+      # Docker image here that supports NodeJS
+      # - image: circleci/node:13.8.0
+    steps:
+      - checkout
+      - run:
+          name: Run migrations
+          command: |
+            # Your code here
+            # cd backend
+            # npm install
+            # npm run migrations > migrations_dump.txt
+      - run:
+          name: Send migration results to kvdb
+          command: |
+            # if grep -q "has been executed successfully." ~/project/backend/migrations_dump.txt
+            # then
+            #  curl --insecure https://kvdb.io/33GxcCpH7rHocPuWALvF32/migration_${CIRCLE_WORKFLOW_ID:0:7}  -d '1'
+            # fi
+            exit 1
+      # - destroy-environment 
+      # - revert-migrations
 
 #   deploy-frontend:
 #     docker:
