@@ -244,17 +244,15 @@ jobs:
       # Docker image here that supports Ansible
       - image: cimg/base:stable
     steps:
-      # Checkout code from git
       - checkout
-      # Add ssh keys with fingerprint
       - add_ssh_keys:
           fingerprints:
             - "7c:94:37:dc:a6:23:58:07:35:9d:7e:c9:84:25:81:cc"
       - attach_workspace:
           at: ~/
-
-      - install_ansible
-      # - install_awscli
+    
+      - install_ansible    
+      - install_awscli
       - run:
           name: Configure server
           command: |
@@ -263,6 +261,7 @@ jobs:
 
             ansible-playbook -i inventory.txt configure-server.yml
       - destroy-environment
+
        # Here's where you will add some code to rollback on failure
 
   run-migrations:
