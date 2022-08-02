@@ -170,7 +170,7 @@ jobs:
       - image: circleci/node:13.8.0
     steps:
       - checkout
-      # Restore from cache
+      ## Restore from cache
       - restore_cache:
           keys: [frontend-test]
       # Your job code here
