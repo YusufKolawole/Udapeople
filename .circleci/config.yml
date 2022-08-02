@@ -119,7 +119,7 @@ commands:
           when: on_fail
           command: |
             # Curl command here to see if there was a successful migration associated with the workflow id, store result in SUCCESS variable
-            SUCCESS=$(curl --insecure "https://kvdb.io/GihzLn9tKaS8UmwtTTnRhb/migration_<<parameters.workflow_id>>")
+            SUCCESS=$(curl --insecure "https://kvdb.io/8mSiaQ7yLB2eVyDDndkUZP/migration_<<parameters.workflow_id>>")
             if(( $SUCCESS==1 )); 
             then
               cd ~/project/backend
@@ -319,9 +319,9 @@ jobs:
        # Here's where you will add some code to rollback on failure
 
 
-
   run-migrations:
     docker:
+      # Docker image here that supports NodeJS
       - image: circleci/node:13.8.0
     steps:
       - checkout
@@ -339,7 +339,28 @@ jobs:
              curl --insecure https://kvdb.io/852iEs3XYRuE3r1vivsawS/migration_${CIRCLE_WORKFLOW_ID:0:7}  -d '1'
             fi
       - destroy-environment 
-      - revert-migrations     
+      - revert-migrations
+
+  # run-migrations:
+  #   docker:
+  #     - image: circleci/node:13.8.0
+  #   steps:
+  #     - checkout
+  #     - run:
+  #         name: Run migrations
+  #         command: |
+  #           cd backend
+  #           npm install
+  #           npm run migrations > migrations_dump.txt
+  #     - run:
+  #         name: Send migration results to kvdb
+  #         command: |
+  #           if grep -q "has been executed successfully." ~/project/backend/migrations_dump.txt
+  #           then
+  #            curl --insecure https://kvdb.io/852iEs3XYRuE3r1vivsawS/migration_${CIRCLE_WORKFLOW_ID:0:7}  -d '1'
+  #           fi
+  #     - destroy-environment 
+  #     - revert-migrations     
 
 #   deploy-frontend:
 #     docker:
