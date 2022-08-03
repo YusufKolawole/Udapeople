@@ -53,27 +53,27 @@ commands:
             
             
 
-  revert-migrations:
-    description: Revert the last migration if successfully run in the current workflow.
-    parameters:
-      # Add parameter here #
-      workflow_id:
-        default: "${CIRCLE_WORKFLOW_ID:0:7}"
-        type: string
+  # revert-migrations:
+  #   description: Revert the last migration if successfully run in the current workflow.
+  #   parameters:
+  #     # Add parameter here #
+  #     workflow_id:
+  #       default: "${CIRCLE_WORKFLOW_ID:0:7}"
+  #       type: string
     
-    steps:
-      - run:
-          name: Revert migrations
-          when: on_fail
-          command: |
-            # Curl command here to see if there was a successful migration associated with the workflow id, store result in SUCCESS variable
-            SUCCESS=$(curl --insecure "https://kvdb.io/AfxCuACWvcrzuTJxyg9dLE/migration_<<parameters.workflow_id>>")
-            if(( $SUCCESS==1 )); 
-            then
-              cd ~/project/backend
-              npm install
-              npm run migrations:revert
-            fi
+  #   steps:
+  #     - run:
+  #         name: Revert migrations
+  #         when: on_fail
+  #         command: |
+  #           # Curl command here to see if there was a successful migration associated with the workflow id, store result in SUCCESS variable
+  #           SUCCESS=$(curl --insecure "https://kvdb.io/AfxCuACWvcrzuTJxyg9dLE/migration_<<parameters.workflow_id>>")
+  #           if(( $SUCCESS==1 )); 
+  #           then
+  #             cd ~/project/backend
+  #             npm install
+  #             npm run migrations:revert
+  #           fi
 
 
 
@@ -287,7 +287,7 @@ jobs:
              curl --insecure https://kvdb.io/AfxCuACWvcrzuTJxyg9dLE/migration_${CIRCLE_WORKFLOW_ID:0:7}  -d '1'
             fi
       - destroy-environment 
-      - revert-migrations     
+      # - revert-migrations     
 
   deploy-frontend:
     docker:
@@ -327,7 +327,7 @@ jobs:
             npm run build
             aws s3 cp dist s3://udapeople-${CIRCLE_WORKFLOW_ID:0:7} --recursive
       - destroy-environment
-      - revert-migrations
+      # - revert-migrations
 
      
                     
@@ -367,7 +367,7 @@ jobs:
 
 
       - destroy-environment
-      - revert-migrations
+      # - revert-migrations
 
 
 
@@ -408,7 +408,7 @@ jobs:
                 exit 1
               fi
       - destroy-environment
-      - revert-migrations
+      # - revert-migrations
 
 
  
@@ -434,7 +434,7 @@ jobs:
             --parameter-overrides WorkflowID="${CIRCLE_WORKFLOW_ID:0:7}" \
             --stack-name InitialStack
       - destroy-environment
-      - revert-migrations
+      # - revert-migrations
  
 
   cleanup:
