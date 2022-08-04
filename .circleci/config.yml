@@ -245,30 +245,30 @@ jobs:
       # Here's where you will add some code to rollback on failure  
       - destroy-environment 
 
-  # configure-infrastructure:
-  #   docker:
-  #     # Docker image here that supports Ansible
-  #     - image: cimg/base:stable
-  #   steps:
-  #     - checkout
-  #     - add_ssh_keys:
-  #         fingerprints:
-  #           - "7c:94:37:dc:a6:23:58:07:35:9d:7e:c9:84:25:81:cc"
-  #     - attach_workspace:
-  #         at: ~/
+  configure-infrastructure:
+    docker:
+      # Docker image here that supports Ansible
+      - image: cimg/base:stable
+    steps:
+      - checkout
+      - add_ssh_keys:
+          fingerprints:
+            - "7c:94:37:dc:a6:23:58:07:35:9d:7e:c9:84:25:81:cc"
+      - attach_workspace:
+          at: ~/
     
-  #     - install_ansible    
-  #     - install_awscli
-  #     - run:
-  #         name: Configure server
-  #         command: |
-  #           cd .circleci/ansible
-  #           cat inventory.txt
+      - install_ansible    
+      - install_awscli
+      - run:
+          name: Configure server
+          command: |
+            cd .circleci/ansible
+            cat inventory.txt
 
-  #           ansible-playbook -i inventory.txt configure-server.yml
-  #     - destroy-environment
+            ansible-playbook -i inventory.txt configure-server.yml
+      - destroy-environment
 
-  #      # Here's where you will add some code to rollback on failure
+       # Here's where you will add some code to rollback on failure
 
 
 
