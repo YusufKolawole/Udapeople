@@ -2,4 +2,4 @@ Github url:
 https://github.com/YusufKolawole/Udapeople
 
 S3 bucket url:
-http://udapeople-f77e412.s3-website-us-east-1.amazonaws.com
+http://udapeople-c68f5ab.s3-website-us-east-1.amazonaws.com/#/employees
