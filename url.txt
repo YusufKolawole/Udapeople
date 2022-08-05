@@ -3,3 +3,6 @@ https://github.com/YusufKolawole/Udapeople
 
 S3 bucket url:
 http://udapeople-c68f5ab.s3-website-us-east-1.amazonaws.com/#/employees
+
+Cloudfront url:
+https://d36xr021c3954d.cloudfront.net/
